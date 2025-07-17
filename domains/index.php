@@ -19,6 +19,8 @@ $search = $_GET['search'] ?? '';
 $page = max(1, intval($_GET['page'] ?? 1));
 $perPage = 20;
 $offset = ($page - 1) * $perPage;
+$perPage = (int) $perPage;
+$offset = (int) $offset;
 
 // Buduj zapytanie
 $whereConditions = [];
@@ -58,7 +60,7 @@ $sql = "
     $whereClause
     GROUP BY d.id
     ORDER BY d.created_at DESC
-    LIMIT ? OFFSET ?
+    LIMIT $perPage OFFSET $offset
 ";
 
 $countSql = "
@@ -70,7 +72,7 @@ $countSql = "
     $whereClause
 ";
 
-$allParams = array_merge([$_SESSION['user_id']], $params, [$perPage, $offset]);
+$allParams = array_merge([$_SESSION['user_id']], $params);
 $countParams = array_merge([$_SESSION['user_id']], $params);
 
 $stmt = $db->prepare($sql);

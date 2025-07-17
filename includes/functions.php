@@ -29,17 +29,18 @@ function getDashboardStats($db) {
 }
 
 function getRecentDomains($db, $limit = 10) {
+    $limit = (int) $limit;
     $stmt = $db->prepare("
-        SELECT d.*, 
+        SELECT d.*,
                GROUP_CONCAT(c.name) as categories
         FROM domains d
         LEFT JOIN domain_analysis da ON d.id = da.domain_id AND da.is_interesting = 1
         LEFT JOIN categories c ON da.category_id = c.id
         GROUP BY d.id
         ORDER BY d.created_at DESC
-        LIMIT ?
+        LIMIT $limit
     ");
-    $stmt->execute([$limit]);
+    $stmt->execute();
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
