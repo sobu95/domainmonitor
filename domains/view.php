@@ -49,6 +49,9 @@ try {
     $stmt->execute([$domainId]);
     $analyses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // Pobierz dane widoczności z Semstorm
+    $visibility = getSemstormVisibility($domain['domain_name']);
+
 } catch (Exception $e) {
     error_log("Error in domains/view.php: " . $e->getMessage());
     header('Location: index.php');
@@ -160,6 +163,44 @@ $daysLeft = ceil(($regDate - $today) / (60 * 60 * 24));
                         </div>
                     </div>
                 </div>
+
+                <?php if ($visibility): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Widoczność</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="h4 mb-0"><?php echo $visibility['current']['top3'] ?? 0; ?></div>
+                                <div class="text-muted">TOP3</div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="h4 mb-0"><?php echo $visibility['current']['top10'] ?? 0; ?></div>
+                                <div class="text-muted">TOP10</div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="h4 mb-0"><?php echo $visibility['current']['top20'] ?? 0; ?></div>
+                                <div class="text-muted">TOP20</div>
+                            </div>
+                            <div class="col-6 col-md-3 mb-3">
+                                <div class="h4 mb-0"><?php echo $visibility['current']['traffic'] ?? 0; ?></div>
+                                <div class="text-muted">Ruch</div>
+                            </div>
+                        </div>
+                        <?php if (!empty($visibility['peak'])): ?>
+                        <hr>
+                        <p class="mb-0 text-muted small">
+                            Maksimum z <?php echo date('Y-m-d', strtotime($visibility['peak']['date'])); ?>:
+                            TOP3 <?php echo $visibility['peak']['top3'] ?? 0; ?>,
+                            TOP10 <?php echo $visibility['peak']['top10'] ?? 0; ?>,
+                            TOP20 <?php echo $visibility['peak']['top20'] ?? 0; ?>,
+                            ruch <?php echo $visibility['peak']['traffic'] ?? 0; ?>
+                        </p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- Analiza AI -->
                 <?php if (!empty($analyses)): ?>

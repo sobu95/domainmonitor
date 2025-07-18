@@ -179,6 +179,106 @@ function parseDomainAnalysis($htmlResponse) {
     return $domains;
 }
 
+function getSemstormAccessToken() {
+    $config = include __DIR__ . '/../config/config.php';
+
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+
+    if (!empty($_SESSION['semstorm_access_token']) && !empty($_SESSION['semstorm_token_expires']) && $_SESSION['semstorm_token_expires'] > time()) {
+        return $_SESSION['semstorm_access_token'];
+    }
+
+    $postFields = http_build_query([
+        'grant_type' => 'client_credentials',
+        'app_key' => $config['semstorm_app_key'] ?? '',
+        'app_secret' => $config['semstorm_app_secret'] ?? ''
+    ]);
+
+    $ch = curl_init('https://api.semstorm.com/authorization/token');
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $postFields);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/x-www-form-urlencoded']);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200) {
+        $result = json_decode($response, true);
+        if (isset($result['access_token'])) {
+            $_SESSION['semstorm_access_token'] = $result['access_token'];
+            $expiresIn = intval($result['expires_in'] ?? 3600);
+            $_SESSION['semstorm_token_expires'] = time() + $expiresIn - 60;
+            return $_SESSION['semstorm_access_token'];
+        }
+    }
+
+    return null;
+}
+
+function callSemstormAPI($endpoint, $payload = []) {
+    $token = getSemstormAccessToken();
+    if (!$token) {
+        return null;
+    }
+
+    $ch = curl_init('https://api.semstorm.com/' . ltrim($endpoint, '/'));
+    curl_setopt($ch, CURLOPT_POST, 1);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_HTTPHEADER, [
+        'Content-Type: application/json',
+        'Authorization: Bearer ' . $token
+    ]);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+    $response = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 200) {
+        return json_decode($response, true);
+    }
+
+    return null;
+}
+
+function getSemstormVisibility($domain) {
+    $config = include __DIR__ . '/../config/config.php';
+    $endpoint = 'semstorm/v' . ($config['semstorm_api_version'] ?? 1) . '/explorer/domain-stats-popular-keywords';
+
+    $payload = [
+        'domains' => [$domain],
+        'date_from' => date('Y-m-d', strtotime('-24 months')),
+        'date_to' => date('Y-m-d')
+    ];
+
+    $result = callSemstormAPI($endpoint, $payload);
+    if (!$result || empty($result['data'][$domain])) {
+        return null;
+    }
+
+    $items = $result['data'][$domain];
+    if (!is_array($items)) {
+        return null;
+    }
+
+    $current = end($items);
+    $peak = $current;
+    foreach ($items as $row) {
+        if (isset($row['top20']) && ($peak === null || $row['top20'] > ($peak['top20'] ?? 0))) {
+            $peak = $row;
+        }
+    }
+
+    return [
+        'current' => $current,
+        'peak' => $peak
+    ];
+}
+
 function logActivity($db, $action, $details = '') {
     $stmt = $db->prepare("INSERT INTO activity_logs (user_id, action, details, created_at) VALUES (?, ?, ?, NOW())");
     $stmt->execute([$_SESSION['user_id'] ?? 0, $action, $details]);
