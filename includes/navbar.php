@@ -38,6 +38,7 @@ $baseUrl = rtrim($config['site_url'], '/');
                         <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/categories.php">Kategorie</a></li>
                         <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/users.php">Użytkownicy</a></li>
                         <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/config.php">Konfiguracja</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/domains.php">Domeny</a></li>
                         <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/logs.php">Logi</a></li>
                     </ul>
                 </li>
