@@ -60,17 +60,17 @@ function getUpcomingRegistrations($db, $userId, $days = 7) {
 }
 
 function sendEmail($to, $subject, $body, $isHtml = true) {
-    $config = include 'config/config.php';
+    $config = include __DIR__ . '/../config/config.php';
     
     // Sprawdź czy PHPMailer jest zainstalowany
-    if (!file_exists('vendor/phpmailer/phpmailer/src/PHPMailer.php')) {
+    if (!file_exists(__DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php')) {
         error_log("PHPMailer not installed. Run: composer install");
         return false;
     }
-    
-    require_once 'vendor/phpmailer/phpmailer/src/PHPMailer.php';
-    require_once 'vendor/phpmailer/phpmailer/src/SMTP.php';
-    require_once 'vendor/phpmailer/phpmailer/src/Exception.php';
+
+    require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/PHPMailer.php';
+    require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/SMTP.php';
+    require_once __DIR__ . '/../vendor/phpmailer/phpmailer/src/Exception.php';
     
     $mail = new PHPMailer\PHPMailer\PHPMailer(true);
     
@@ -100,7 +100,7 @@ function sendEmail($to, $subject, $body, $isHtml = true) {
 }
 
 function callGeminiAPI($prompt, $domains) {
-    $config = include 'config/config.php';
+    $config = include __DIR__ . '/../config/config.php';
     
     $data = [
         'contents' => [

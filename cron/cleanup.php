@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 // Cron job do czyszczenia starych danych
 require_once dirname(__DIR__) . '/config/database.php';

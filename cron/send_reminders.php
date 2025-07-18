@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 // Cron job do wysyłania przypomnień
 require_once dirname(__DIR__) . '/config/database.php';

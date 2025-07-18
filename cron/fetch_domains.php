@@ -1,4 +1,3 @@
-#!/usr/bin/php
 <?php
 // Cron job do pobierania domen
 require_once dirname(__DIR__) . '/config/database.php';
