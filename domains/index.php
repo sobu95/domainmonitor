@@ -12,6 +12,14 @@ require_once '../includes/functions.php';
 $database = new Database();
 $db = $database->getConnection();
 
+$message = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['remove_non_favorites'])) {
+    $stmt = $db->prepare('DELETE d FROM domains d LEFT JOIN favorite_domains fd ON d.id = fd.domain_id WHERE fd.id IS NULL');
+    $stmt->execute();
+    logActivity($db, 'delete_non_favorites');
+    $message = 'Usunięto domeny nieoznaczone jako ulubione.';
+}
+
 // Parametry filtrowania
 $category = $_GET['category'] ?? '';
 $filter = $_GET['filter'] ?? '';
@@ -127,8 +135,20 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 <i class="fas fa-download"></i> Export
                             </button>
                         </div>
+                        <form method="POST" class="ms-2" onsubmit="return confirm('Czy na pewno chcesz usunąć domeny nieoznaczone jako ulubione?');">
+                            <input type="hidden" name="remove_non_favorites" value="1">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Usuń nieulubione
+                            </button>
+                        </form>
                     </div>
                 </div>
+
+                <?php if ($message): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check"></i> <?php echo htmlspecialchars($message); ?>
+                </div>
+                <?php endif; ?>
 
                 <!-- Filtry i wyszukiwanie -->
                 <div class="card mb-4">
