@@ -15,7 +15,26 @@ try {
 } catch (Exception $e) {
     die('Błąd połączenia z bazą danych: ' . $e->getMessage());
 }
-$stmt = $db->prepare("SELECT d.*, GROUP_CONCAT(DISTINCT c.name) AS categories, GROUP_CONCAT(DISTINCT da.description SEPARATOR " | ") AS descriptions FROM favorite_domains fd JOIN domains d ON fd.domain_id = d.id LEFT JOIN domain_analysis da ON d.id = da.domain_id LEFT JOIN categories c ON da.category_id = c.id WHERE fd.user_id = ? GROUP BY d.id ORDER BY fd.created_at DESC");
+$stmt = $db->prepare("SELECT
+        d.id,
+        d.domain_name,
+        d.fetch_date,
+        d.registration_available_date,
+        d.created_at,
+        GROUP_CONCAT(DISTINCT c.name) AS categories,
+        GROUP_CONCAT(DISTINCT da.description SEPARATOR ' | ') AS descriptions
+     FROM favorite_domains fd
+     JOIN domains d ON fd.domain_id = d.id
+     LEFT JOIN domain_analysis da ON d.id = da.domain_id
+     LEFT JOIN categories c ON da.category_id = c.id
+     WHERE fd.user_id = ?
+     GROUP BY
+        d.id,
+        d.domain_name,
+        d.fetch_date,
+        d.registration_available_date,
+        d.created_at
+     ORDER BY fd.created_at DESC");
 
 $stmt->execute([$_SESSION['user_id']]);
 $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);

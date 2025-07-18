@@ -49,16 +49,26 @@ $whereClause = !empty($whereConditions) ? 'WHERE ' . implode(' AND ', $whereCond
 
 // Pobierz domeny
 $sql = "
-    SELECT DISTINCT d.*, 
-           GROUP_CONCAT(DISTINCT c.name) as categories,
-           GROUP_CONCAT(DISTINCT da.description SEPARATOR ' | ') as descriptions,
-           CASE WHEN fd.id IS NOT NULL THEN 1 ELSE 0 END as is_favorite
+    SELECT
+        d.id,
+        d.domain_name,
+        d.fetch_date,
+        d.registration_available_date,
+        d.created_at,
+        GROUP_CONCAT(DISTINCT c.name) AS categories,
+        GROUP_CONCAT(DISTINCT da.description SEPARATOR ' | ') AS descriptions,
+        CASE WHEN MAX(fd.id) IS NOT NULL THEN 1 ELSE 0 END AS is_favorite
     FROM domains d
     LEFT JOIN domain_analysis da ON d.id = da.domain_id
     LEFT JOIN categories c ON da.category_id = c.id
     LEFT JOIN favorite_domains fd ON d.id = fd.domain_id AND fd.user_id = ?
     $whereClause
-    GROUP BY d.id
+    GROUP BY
+        d.id,
+        d.domain_name,
+        d.fetch_date,
+        d.registration_available_date,
+        d.created_at
     ORDER BY d.created_at DESC
     LIMIT $perPage OFFSET $offset
 ";
