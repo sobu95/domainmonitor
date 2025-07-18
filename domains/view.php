@@ -58,6 +58,8 @@ try {
 $regDate = strtotime($domain['registration_available_date']);
 $today = time();
 $daysLeft = ceil(($regDate - $today) / (60 * 60 * 24));
+
+$semstormStats = getSemstormDomainVisibility($domain['domain_name']);
 ?>
 
 <!DOCTYPE html>
@@ -160,6 +162,42 @@ $daysLeft = ceil(($regDate - $today) / (60 * 60 * 24));
                         </div>
                     </div>
                 </div>
+
+                <!-- Widoczność SEMSTORM -->
+                <?php if ($semstormStats): ?>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Widoczność SEMSTORM</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Aktualne dane<?php if (!empty($semstormStats['current']['date'])) echo ' (' . DateTime::createFromFormat('Ymd', $semstormStats['current']['date'])->format('d.m.Y') . ')'; ?></h6>
+                                <ul class="list-unstyled">
+                                    <li>TOP3: <?php echo number_format($semstormStats['current']['top3']); ?></li>
+                                    <li>TOP10: <?php echo number_format($semstormStats['current']['top10']); ?></li>
+                                    <li>TOP20: <?php echo number_format($semstormStats['current']['top20']); ?></li>
+                                    <li>Ruch: <?php echo number_format($semstormStats['current']['traffic']); ?></li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Maksymalna widoczność</h6>
+                                <ul class="list-unstyled">
+                                    <li>TOP3: <?php echo number_format($semstormStats['max']['top3']); ?><?php if ($semstormStats['max']['date_top3']) echo ' (' . DateTime::createFromFormat('Ymd', $semstormStats['max']['date_top3'])->format('d.m.Y') . ')'; ?></li>
+                                    <li>TOP10: <?php echo number_format($semstormStats['max']['top10']); ?><?php if ($semstormStats['max']['date_top10']) echo ' (' . DateTime::createFromFormat('Ymd', $semstormStats['max']['date_top10'])->format('d.m.Y') . ')'; ?></li>
+                                    <li>TOP20: <?php echo number_format($semstormStats['max']['top20']); ?><?php if ($semstormStats['max']['date_top20']) echo ' (' . DateTime::createFromFormat('Ymd', $semstormStats['max']['date_top20'])->format('d.m.Y') . ')'; ?></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <p class="text-muted mb-0">Brak danych z SEMSTORM.</p>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <!-- Analiza AI -->
                 <?php if (!empty($analyses)): ?>
