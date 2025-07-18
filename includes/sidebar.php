@@ -75,6 +75,11 @@ $baseUrl = rtrim($config['site_url'], '/');
                 </a>
             </li>
             <li class="nav-item">
+                <a class="nav-link" href="<?= $baseUrl ?>/admin/domains.php">
+                    <i class="fas fa-database"></i> Domeny
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link" href="<?= $baseUrl ?>/admin/logs.php">
                     <i class="fas fa-file-alt"></i> Logi
                 </a>
