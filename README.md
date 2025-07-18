@@ -9,6 +9,7 @@ System monitorowania wygasających domen z analizą AI i powiadomieniami.
 - **System powiadomień**: Przypomnienia o nadchodzących rejestracjach
 - **Panel administracyjny**: Zarządzanie kategoriami, użytkownikami i konfiguracją
 - **Ulubione domeny**: Możliwość dodawania domen do ulubionych
+- **Czyszczenie nieulubionych**: Usuwanie domen nieoznaczonych jako ulubione
 - **Responsywny design**: Nowoczesny interfejs oparty na Bootstrap
 
 ## Wymagania
