@@ -105,7 +105,15 @@ function toggleFavorite(domainId, button) {
         },
         body: JSON.stringify({ domain_id: domainId })
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => {
+                const msg = text || `Błąd ${response.status}`;
+                throw new Error(msg);
+            });
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             if (data.is_favorite) {
@@ -129,7 +137,11 @@ function toggleFavorite(domainId, button) {
     .catch(error => {
         // Restore original state
         icon.className = originalClass;
-        showNotification('Błąd połączenia', 'error');
+        if (error && error.message && error.message !== 'Failed to fetch') {
+            showNotification(error.message, 'error');
+        } else {
+            showNotification('Błąd połączenia', 'error');
+        }
     })
     .finally(() => {
         button.disabled = false;
