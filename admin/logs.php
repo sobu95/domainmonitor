@@ -17,6 +17,20 @@ require_once '../includes/functions.php';
 $database = new Database();
 $db = $database->getConnection();
 
+$message = '';
+$error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['clear_logs'])) {
+    try {
+        $stmt = $db->prepare('DELETE FROM fetch_logs');
+        $stmt->execute();
+        logActivity($db, 'clear_fetch_logs');
+        $message = 'Logi zostały pomyślnie wyczyszczone.';
+    } catch (Exception $e) {
+        $error = 'Wystąpił błąd podczas czyszczenia logów.';
+    }
+}
+
 $stmt = $db->query('SELECT * FROM fetch_logs ORDER BY created_at DESC LIMIT 50');
 $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
 ?>
@@ -38,7 +52,22 @@ $logs = $stmt->fetchAll(PDO::FETCH_ASSOC);
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                 <h1 class="h2"><i class="fas fa-file-alt"></i> Logi</h1>
+                <form method="POST" onsubmit="return confirm('Czy na pewno chcesz wyczyścić wszystkie logi?');">
+                    <input type="hidden" name="clear_logs" value="1">
+                    <button type="submit" class="btn btn-sm btn-danger">
+                        <i class="fas fa-trash"></i> Wyczyść logi
+                    </button>
+                </form>
             </div>
+            <?php if ($message): ?>
+            <div class="alert alert-success">
+                <i class="fas fa-check"></i> <?php echo htmlspecialchars($message); ?>
+            </div>
+            <?php elseif ($error): ?>
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> <?php echo htmlspecialchars($error); ?>
+            </div>
+            <?php endif; ?>
             <div class="card">
                 <div class="card-body table-responsive">
                     <table class="table table-hover">
