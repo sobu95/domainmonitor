@@ -1,7 +1,13 @@
 <?php
 session_start();
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+
+// Enable verbose error reporting in non-production environments
+if (getenv('APP_ENV') !== 'production') {
+    error_reporting(E_ALL);
+    ini_set('display_errors', '1');
+} else {
+    error_reporting(0);
+}
 
 // Sprawdź czy system jest zainstalowany
 if (!file_exists('config/config.php')) {
