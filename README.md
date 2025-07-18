@@ -16,23 +16,28 @@ System monitorowania wygasających domen z analizą AI i powiadomieniami.
 - PHP 7.4 lub nowszy
 - MySQL 5.7 lub nowszy
 - Composer
+- Node.js i npm (do uruchamiania narzędzi developerskich)
 - Dostęp do cron jobs
 - Klucz API Gemini
 
 ## Instalacja
 
 1. **Pobierz pliki** na swój hosting
-2. **Zainstaluj zależności**:
+2. **Zainstaluj zależności PHP**:
    ```bash
    composer install
    ```
-3. **Utwórz bazę danych** MySQL
-4. **Uruchom instalator** - przejdź do `install.php` w przeglądarce
-5. **Utwórz katalog `logs/`** (jeśli jeszcze nie istnieje), w którym będą zapisywane pliki logów:
+3. **Zainstaluj pakiety npm** (wymagane m.in. do lintera):
+   ```bash
+   npm install
+   ```
+4. **Utwórz bazę danych** MySQL
+5. **Uruchom instalator** - przejdź do `install.php` w przeglądarce
+6. **Utwórz katalog `logs/`** (jeśli jeszcze nie istnieje), w którym będą zapisywane pliki logów:
    ```bash
    mkdir -p logs
    ```
-6. **Skonfiguruj cron jobs** zgodnie z instrukcjami z instalatora
+7. **Skonfiguruj cron jobs** zgodnie z instrukcjami z instalatora
 
 ## Konfiguracja Cron Jobs
 
