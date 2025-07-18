@@ -91,6 +91,26 @@ System obsługuje wysyłanie emaili przez SMTP. Skonfiguruj:
 - Sesje zabezpieczone
 - Logi aktywności
 
+## Aktualizacja bazy danych
+
+Po aktualizacji projektu do najnowszej wersji należy dodać tabelę `activity_logs`.
+Uruchom zapytania SQL z katalogu `supabase/migrations/` lub wykonaj poniższe
+polecenie w swojej bazie danych:
+
+```sql
+CREATE TABLE IF NOT EXISTS activity_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    action VARCHAR(100) NOT NULL,
+    details TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+```
+
+Jeśli korzystasz z wcześniejszej instalacji, wystarczy uruchomić ten skrypt lub
+zaimportować zaktualizowane migracje.
+
 ## Wsparcie
 
 W przypadku problemów:
