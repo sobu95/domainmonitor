@@ -1,5 +1,9 @@
 // Domain Monitor JavaScript
 
+// Determine the directory of this script and the application base path
+const scriptDirectory = new URL('.', document.currentScript.src).href;
+const BASE_PATH = new URL('../..', scriptDirectory).href;
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
@@ -87,7 +91,7 @@ function toggleFavorite(domainId, button) {
     icon.className = 'fas fa-spinner fa-spin';
     button.disabled = true;
     
-    fetch('ajax/toggle_favorite.php', {
+    fetch(`${BASE_PATH}ajax/toggle_favorite.php`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -157,7 +161,7 @@ function filterByCategory(categoryId) {
 }
 
 function refreshDashboardStats() {
-    fetch('ajax/dashboard_stats.php')
+    fetch(`${BASE_PATH}ajax/dashboard_stats.php`)
     .then(response => response.json())
     .then(data => {
         if (data.success) {
