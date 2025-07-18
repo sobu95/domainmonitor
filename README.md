@@ -28,7 +28,11 @@ System monitorowania wygasających domen z analizą AI i powiadomieniami.
    ```
 3. **Utwórz bazę danych** MySQL
 4. **Uruchom instalator** - przejdź do `install.php` w przeglądarce
-5. **Skonfiguruj cron jobs** zgodnie z instrukcjami z instalatora
+5. **Utwórz katalog `logs/`** (jeśli jeszcze nie istnieje), w którym będą zapisywane pliki logów:
+   ```bash
+   mkdir -p logs
+   ```
+6. **Skonfiguruj cron jobs** zgodnie z instrukcjami z instalatora
 
 ## Konfiguracja Cron Jobs
 
