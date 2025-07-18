@@ -1,6 +1,10 @@
+<?php
+$config = include __DIR__ . '/../config/config.php';
+$baseUrl = rtrim($config['site_url'], '/');
+?>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/index.php">
+        <a class="navbar-brand" href="<?= $baseUrl ?>/index.php">
             <i class="fas fa-globe"></i> Domain Monitor
         </a>
         
@@ -11,17 +15,17 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="/index.php">
+                    <a class="nav-link" href="<?= $baseUrl ?>/index.php">
                         <i class="fas fa-tachometer-alt"></i> Dashboard
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/domains/">
+                    <a class="nav-link" href="<?= $baseUrl ?>/domains/">
                         <i class="fas fa-list"></i> Domeny
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/favorites.php">
+                    <a class="nav-link" href="<?= $baseUrl ?>/favorites.php">
                         <i class="fas fa-heart"></i> Ulubione
                     </a>
                 </li>
@@ -31,10 +35,10 @@
                         <i class="fas fa-cog"></i> Administracja
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/admin/categories.php">Kategorie</a></li>
-                        <li><a class="dropdown-item" href="/admin/users.php">Użytkownicy</a></li>
-                        <li><a class="dropdown-item" href="/admin/config.php">Konfiguracja</a></li>
-                        <li><a class="dropdown-item" href="/admin/logs.php">Logi</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/categories.php">Kategorie</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/users.php">Użytkownicy</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/config.php">Konfiguracja</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/logs.php">Logi</a></li>
                     </ul>
                 </li>
                 <?php endif; ?>
@@ -46,9 +50,9 @@
                         <i class="fas fa-user"></i> <?php echo htmlspecialchars($_SESSION['username']); ?>
                     </a>
                     <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/profile.php">Profil</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/profile.php">Profil</a></li>
                         <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="/auth/logout.php">Wyloguj</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/auth/logout.php">Wyloguj</a></li>
                     </ul>
                 </li>
             </ul>
