@@ -124,6 +124,15 @@
                                         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
                                         FOREIGN KEY (domain_id) REFERENCES domains(id) ON DELETE CASCADE
                                     )",
+
+                                    "CREATE TABLE IF NOT EXISTS activity_logs (
+                                        id INT AUTO_INCREMENT PRIMARY KEY,
+                                        user_id INT NOT NULL,
+                                        action VARCHAR(100) NOT NULL,
+                                        details TEXT,
+                                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                                        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+                                    )",
                                     
                                     "INSERT IGNORE INTO categories (name, prompt) VALUES 
                                     ('Moda', 'Przeanalizuj przesłaną listę domen, czy na tej liście znajdują się domeny, które pasują pod stronę o tematyce: moda. Wynik przedstaw w tabeli podając domenę oraz jej krótki opis, dlaczego jest interesująca. Tabela powinna być w formacie HTML.'),
