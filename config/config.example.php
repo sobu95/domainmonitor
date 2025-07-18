@@ -13,10 +13,6 @@ return [
     'email_username' => 'your_email@gmail.com',
     'email_password' => 'your_app_password',
     'email_from_name' => 'Domain Monitor',
-
-    // SEMSTORM API credentials
-    'semstorm_client_id' => 'your_semstorm_client_id',
-    'semstorm_client_secret' => 'your_semstorm_client_secret',
     
     'site_url' => 'https://yourdomain.com',
     'site_name' => 'Domain Monitor',
