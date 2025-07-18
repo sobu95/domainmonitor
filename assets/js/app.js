@@ -4,7 +4,7 @@
 const scriptDirectory = new URL('.', document.currentScript.src).href;
 const BASE_PATH = new URL('../..', scriptDirectory).href;
 
-document.addEventListener('DOMContentLoaded', function() {
+function initApp() {
     // Initialize tooltips
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
@@ -81,7 +81,13 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 300);
         }, 5000);
     });
-});
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
 
 function toggleFavorite(domainId, button) {
     const icon = button.querySelector('i');
