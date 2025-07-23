@@ -161,6 +161,28 @@ $daysLeft = ceil(($regDate - $today) / (60 * 60 * 24));
                     </div>
                 </div>
 
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Statystyki linków</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-md-4"><strong>Domain Authority:</strong> <?php echo $domain['domain_authority'] ?? '-'; ?></div>
+                            <div class="col-md-4"><strong>Page Authority:</strong> <?php echo $domain['page_authority'] ?? '-'; ?></div>
+                            <div class="col-md-4"><strong>Linkujące domeny:</strong> <?php echo $domain['linking_domains'] ?? '-'; ?></div>
+                        </div>
+                        <?php if (!empty($domain['linking_domains_list'])): ?>
+                        <hr>
+                        <strong>Lista linkujących domen:</strong>
+                        <ul class="mt-2">
+                            <?php foreach (explode("\n", $domain['linking_domains_list']) as $ld): ?>
+                            <li><?php echo htmlspecialchars($ld); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
                 <!-- Analiza AI -->
                 <?php if (!empty($analyses)): ?>
                 <div class="card mb-4">

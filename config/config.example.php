@@ -7,6 +7,9 @@ return [
     
     'gemini_api_key' => 'your_gemini_api_key',
     'gemini_model' => 'gemini-2.5-flash',
+
+    // Lista kluczy API Moz Link. Każdy w osobnym elemencie tablicy.
+    'moz_api_keys' => ['your_moz_api_key'],
     
     'email_smtp_host' => 'smtp.gmail.com',
     'email_smtp_port' => 587,
