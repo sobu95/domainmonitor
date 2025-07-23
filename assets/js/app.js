@@ -17,8 +17,18 @@ function initApp() {
             e.preventDefault();
             const button = e.target.closest('.toggle-favorite');
             const domainId = button.dataset.domainId;
-            
+
             toggleFavorite(domainId, button);
+        }
+    });
+
+    // Refresh Moz metrics
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('#refreshMozBtn')) {
+            e.preventDefault();
+            const btn = e.target.closest('#refreshMozBtn');
+            const domainId = btn.dataset.domainId;
+            refreshMozMetrics(domainId, btn);
         }
     });
 
@@ -194,6 +204,61 @@ function refreshDashboardStats() {
     });
 }
 
+function refreshMozMetrics(domainId, button) {
+    const icon = button.querySelector('i');
+    const originalClass = icon.className;
+
+    icon.className = 'fas fa-spinner fa-spin';
+    button.disabled = true;
+
+    fetch(`${BASE_PATH}ajax/refresh_moz.php`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ domain_id: domainId })
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.text().then(text => { throw new Error(text || `Błąd ${response.status}`); });
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            const m = data.metrics || {};
+            document.getElementById('moz-da').textContent = m.domain_authority ?? '-';
+            document.getElementById('moz-pa').textContent = m.page_authority ?? '-';
+            document.getElementById('moz-links').textContent = m.linking_domains ?? '-';
+
+            const wrapper = document.getElementById('moz-linking-wrapper');
+            const list = document.getElementById('moz-linking-list');
+            list.innerHTML = '';
+            if (m.linking_domains_list) {
+                m.linking_domains_list.split('\n').forEach(ld => {
+                    const li = document.createElement('li');
+                    li.textContent = ld;
+                    list.appendChild(li);
+                });
+                wrapper.style.display = '';
+            } else {
+                wrapper.style.display = 'none';
+            }
+            showNotification('Zaktualizowano dane Moz', 'success');
+        } else {
+            showNotification(data.error || 'Błąd podczas aktualizacji', 'error');
+        }
+    })
+    .catch(err => {
+        showNotification(err.message || 'Błąd połączenia', 'error');
+    })
+    .finally(() => {
+        icon.className = originalClass;
+        button.disabled = false;
+    });
+}
+
 function showNotification(message, type = 'info') {
     const alertClass = type === 'success' ? 'alert-success' : 
                      type === 'error' ? 'alert-danger' : 
@@ -219,3 +284,4 @@ function showNotification(message, type = 'info') {
 window.toggleFavorite = toggleFavorite;
 window.filterByCategory = filterByCategory;
 window.showNotification = showNotification;
+window.refreshMozMetrics = refreshMozMetrics;
