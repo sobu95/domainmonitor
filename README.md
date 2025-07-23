@@ -9,7 +9,7 @@ System monitorowania wygasających domen z analizą AI i powiadomieniami.
 - **System powiadomień**: Przypomnienia o nadchodzących rejestracjach
 - **Panel administracyjny**: Zarządzanie kategoriami, użytkownikami i konfiguracją
 - **Ulubione domeny**: Możliwość dodawania domen do ulubionych
-- **Dokładne daty wygasania**: Po dodaniu domeny do ulubionych system pobiera datę wygaśnięcia z RDAP
+- **Dokładne daty wygasania**: Po dodaniu domeny do ulubionych system pobiera pełną datę i godzinę wygaśnięcia z RDAP
 - **Czyszczenie nieulubionych**: Usuwanie domen nieoznaczonych jako ulubione
 - **Responsywny design**: Nowoczesny interfejs oparty na Bootstrap
 

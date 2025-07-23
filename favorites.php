@@ -143,7 +143,7 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <?php endif; ?>
                                         </td>
                                         <td><?php echo date('d.m.Y', strtotime($domain['fetch_date'])); ?></td>
-                                        <td><?php echo date('d.m.Y', strtotime($domain['registration_available_date'])); ?></td>
+                                        <td><?php echo date('d.m.Y H:i', strtotime($domain['registration_available_date'])); ?></td>
                                         <td>
                                             <?php if ($domain['categories']): ?>
                                                 <?php foreach (explode(',', $domain['categories']) as $cat): ?>

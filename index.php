@@ -176,7 +176,7 @@ $upcomingRegistrations = getUpcomingRegistrations($db, $_SESSION['user_id'], 7);
                                             <tr>
                                                 <td><strong><?php echo htmlspecialchars($domain['domain_name']); ?></strong></td>
                                                 <td><span class="badge bg-info"><?php echo htmlspecialchars($domain['category_name']); ?></span></td>
-                                                <td><?php echo date('d.m.Y', strtotime($domain['registration_available_date'])); ?></td>
+                                                <td><?php echo date('d.m.Y H:i', strtotime($domain['registration_available_date'])); ?></td>
                                                 <td>
                                                     <?php 
                                                     $days = (strtotime($domain['registration_available_date']) - time()) / (60 * 60 * 24);
@@ -225,7 +225,7 @@ $upcomingRegistrations = getUpcomingRegistrations($db, $_SESSION['user_id'], 7);
                                             <tr>
                                                 <td><strong><?php echo htmlspecialchars($domain['domain_name']); ?></strong></td>
                                                 <td><?php echo date('d.m.Y', strtotime($domain['fetch_date'])); ?></td>
-                                                <td><?php echo date('d.m.Y', strtotime($domain['registration_available_date'])); ?></td>
+                                                <td><?php echo date('d.m.Y H:i', strtotime($domain['registration_available_date'])); ?></td>
                                                 <td>
                                                     <?php if (!empty($domain['categories'])): ?>
                                                         <?php foreach (explode(',', $domain['categories']) as $category): ?>

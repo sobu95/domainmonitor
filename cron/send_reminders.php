@@ -31,7 +31,7 @@ try {
         JOIN domains d ON fd.domain_id = d.id
         LEFT JOIN domain_analysis da ON d.id = da.domain_id AND da.is_interesting = 1
         LEFT JOIN categories c ON da.category_id = c.id
-        WHERE d.registration_available_date = ?
+        WHERE DATE(d.registration_available_date) = ?
         AND NOT EXISTS (
             SELECT 1 FROM notifications n 
             WHERE n.user_id = u.id 

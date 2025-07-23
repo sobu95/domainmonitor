@@ -4,7 +4,7 @@
  * Currently uses the dns.pl RDAP service which covers .pl domains.
  *
  * @param string $domain Domain name (e.g. example.pl)
- * @return string|null   Expiration date in Y-m-d format or null on failure
+ * @return string|null   Expiration date in Y-m-d H:i:s format or null on failure
  */
 function fetchRdapExpiration(string $domain): ?string
 {
@@ -34,7 +34,7 @@ function fetchRdapExpiration(string $domain): ?string
 
     foreach ($data['events'] as $event) {
         if (isset($event['eventAction'], $event['eventDate']) && $event['eventAction'] === 'expiration') {
-            return date('Y-m-d', strtotime($event['eventDate']));
+            return date('Y-m-d H:i:s', strtotime($event['eventDate']));
         }
     }
 

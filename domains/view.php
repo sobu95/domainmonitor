@@ -130,7 +130,7 @@ $daysLeft = ceil(($regDate - $today) / (60 * 60 * 24));
                                     </div>
                                     <div class="col-md-6">
                                         <strong>Data dostępności rejestracji:</strong><br>
-                                        <?php echo date('d.m.Y', $regDate); ?>
+                                        <?php echo date('d.m.Y H:i', $regDate); ?>
                                         <?php if ($daysLeft <= 7 && $daysLeft > 0): ?>
                                             <br><small class="text-warning"><i class="fas fa-clock"></i> Za <?php echo $daysLeft; ?> dni</small>
                                         <?php elseif ($daysLeft <= 0): ?>

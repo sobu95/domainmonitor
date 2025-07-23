@@ -34,7 +34,7 @@ try {
     writeLog("Znaleziono $domainsCount domen");
     
     $today = date('Y-m-d');
-    $registrationDate = date('Y-m-d', strtotime('+30 days'));
+    $registrationDate = date('Y-m-d H:i:s', strtotime('+30 days'));
     
     $insertedCount = 0;
     $duplicateCount = 0;

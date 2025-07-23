@@ -38,7 +38,7 @@ try {
         $stmt->execute([$_SESSION['user_id'], $domainId]);
         $isFavorite = true;
 
-        // Pobierz nazwę domeny do aktualizacji daty wygaśnięcia
+        // Pobierz nazwę domeny do aktualizacji daty i godziny wygaśnięcia
         $stmt = $db->prepare("SELECT domain_name FROM domains WHERE id = ?");
         $stmt->execute([$domainId]);
         $domain = $stmt->fetch(PDO::FETCH_ASSOC);

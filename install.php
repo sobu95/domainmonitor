@@ -70,7 +70,7 @@
                                         id INT AUTO_INCREMENT PRIMARY KEY,
                                         domain_name VARCHAR(255) NOT NULL,
                                         fetch_date DATE NOT NULL,
-                                        registration_available_date DATE NOT NULL,
+                                        registration_available_date DATETIME NOT NULL,
                                         dr INT NULL,
                                         linking_domains INT NULL,
                                         link_profile_strength VARCHAR(20) NULL,

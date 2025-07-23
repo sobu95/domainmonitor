@@ -233,12 +233,12 @@ $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </td>
                                         <td><?php echo date('d.m.Y', strtotime($domain['fetch_date'])); ?></td>
                                         <td>
-                                            <?php 
+                                            <?php
                                             $regDate = strtotime($domain['registration_available_date']);
                                             $today = time();
                                             $daysLeft = ceil(($regDate - $today) / (60 * 60 * 24));
                                             ?>
-                                            <?php echo date('d.m.Y', $regDate); ?>
+                                            <?php echo date('d.m.Y H:i', $regDate); ?>
                                             <?php if ($daysLeft <= 7 && $daysLeft > 0): ?>
                                                 <br><small class="text-warning"><i class="fas fa-clock"></i> <?php echo $daysLeft; ?> dni</small>
                                             <?php elseif ($daysLeft <= 0): ?>
