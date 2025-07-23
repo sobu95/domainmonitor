@@ -233,13 +233,15 @@ function refreshMozMetrics(domainId, button) {
             document.getElementById('moz-links').textContent = m.linking_domains ?? '-';
 
             const wrapper = document.getElementById('moz-linking-wrapper');
-            const list = document.getElementById('moz-linking-list');
-            list.innerHTML = '';
+            const tbody = document.getElementById('moz-linking-tbody');
+            tbody.innerHTML = '';
             if (m.linking_domains_list) {
                 m.linking_domains_list.split('\n').forEach(ld => {
-                    const li = document.createElement('li');
-                    li.textContent = ld;
-                    list.appendChild(li);
+                    const tr = document.createElement('tr');
+                    const td = document.createElement('td');
+                    td.textContent = ld;
+                    tr.appendChild(td);
+                    tbody.appendChild(tr);
                 });
                 wrapper.style.display = '';
             } else {

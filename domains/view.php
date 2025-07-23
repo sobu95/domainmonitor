@@ -188,13 +188,22 @@ $daysLeft = ceil(($regDate - $today) / (60 * 60 * 24));
                         <div id="moz-linking-wrapper" style="<?php echo empty($domain['linking_domains_list']) ? 'display:none;' : ''; ?>">
                             <hr>
                             <strong>Lista linkujących domen:</strong>
-                            <ul class="mt-2" id="moz-linking-list">
-                                <?php if (!empty($domain['linking_domains_list'])): ?>
-                                    <?php foreach (explode("\n", $domain['linking_domains_list']) as $ld): ?>
-                                        <li><?php echo htmlspecialchars($ld); ?></li>
-                                    <?php endforeach; ?>
-                                <?php endif; ?>
-                            </ul>
+                            <div class="table-responsive mt-2">
+                                <table class="table table-sm" id="moz-linking-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Domena</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="moz-linking-tbody">
+                                        <?php if (!empty($domain['linking_domains_list'])): ?>
+                                            <?php foreach (explode("\n", $domain['linking_domains_list']) as $ld): ?>
+                                                <tr><td><?php echo htmlspecialchars($ld); ?></td></tr>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
