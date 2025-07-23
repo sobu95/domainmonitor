@@ -18,21 +18,29 @@ try {
 }
 
 $message = '';
-if (
-    $_SERVER['REQUEST_METHOD'] === 'POST' &&
-    isset($_POST['dr'], $_POST['links'], $_POST['strength'])
-) {
-    $update = $db->prepare('UPDATE domains SET dr = ?, linking_domains = ?, link_profile_strength = ? WHERE id = ?');
-    foreach ((array)$_POST['dr'] as $id => $drVal) {
-        $linkVal = $_POST['links'][$id] ?? null;
-        $strengthVal = $_POST['strength'][$id] ?? null;
-        $drVal = $drVal === '' ? null : $drVal;
-        $linkVal = $linkVal === '' ? null : $linkVal;
-        $strengthVal = $strengthVal === '' ? null : $strengthVal;
-        $update->execute([$drVal, $linkVal, $strengthVal, $id]);
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['remove_weak_favorites'])) {
+        $stmt = $db->prepare(
+            "DELETE fd FROM favorite_domains fd " .
+            "JOIN domains d ON fd.domain_id = d.id " .
+            "WHERE fd.user_id = ? AND (d.link_profile_strength IS NULL OR d.link_profile_strength = '' OR d.link_profile_strength = 'Słaby')"
+        );
+        $stmt->execute([$_SESSION['user_id']]);
+        logActivity($db, 'delete_weak_favorites');
+        $message = 'Usunięto domeny o słabym profilu linkowania.';
+    } elseif (isset($_POST['dr'], $_POST['links'], $_POST['strength'])) {
+        $update = $db->prepare('UPDATE domains SET dr = ?, linking_domains = ?, link_profile_strength = ? WHERE id = ?');
+        foreach ((array)$_POST['dr'] as $id => $drVal) {
+            $linkVal = $_POST['links'][$id] ?? null;
+            $strengthVal = $_POST['strength'][$id] ?? null;
+            $drVal = $drVal === '' ? null : $drVal;
+            $linkVal = $linkVal === '' ? null : $linkVal;
+            $strengthVal = $strengthVal === '' ? null : $strengthVal;
+            $update->execute([$drVal, $linkVal, $strengthVal, $id]);
+        }
+        logActivity($db, 'update_domain_metrics', 'favorites');
+        $message = 'Zapisano zmiany.';
     }
-    logActivity($db, 'update_domain_metrics', 'favorites');
-    $message = 'Zapisano zmiany.';
 }
 
 $stmt = $db->prepare("SELECT
@@ -85,6 +93,14 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
             <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
                 <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                     <h1 class="h2"><i class="fas fa-heart"></i> Ulubione domeny</h1>
+                    <div class="btn-toolbar mb-2 mb-md-0">
+                        <form method="POST" class="ms-2" onsubmit="return confirm('Czy na pewno wszystkie domeny mają odpowiednie statusy?');">
+                            <input type="hidden" name="remove_weak_favorites" value="1">
+                            <button type="submit" class="btn btn-sm btn-danger">
+                                <i class="fas fa-trash"></i> Usuń słabe domeny
+                            </button>
+                        </form>
+                    </div>
                 </div>
 
                 <?php if ($message): ?>
