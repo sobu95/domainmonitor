@@ -6,6 +6,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
+
 require_once 'config/database.php';
 require_once 'includes/functions.php';
 
@@ -15,12 +16,28 @@ try {
 } catch (Exception $e) {
     die('Błąd połączenia z bazą danych: ' . $e->getMessage());
 }
+
+$message = '';
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dr'], $_POST['links'])) {
+    $update = $db->prepare('UPDATE domains SET dr = ?, linking_domains = ? WHERE id = ?');
+    foreach ((array)$_POST['dr'] as $id => $drVal) {
+        $linkVal = $_POST['links'][$id] ?? null;
+        $drVal = $drVal === '' ? null : $drVal;
+        $linkVal = $linkVal === '' ? null : $linkVal;
+        $update->execute([$drVal, $linkVal, $id]);
+    }
+    logActivity($db, 'update_domain_metrics', 'favorites');
+    $message = 'Zapisano zmiany.';
+}
+
 $stmt = $db->prepare("SELECT
         d.id,
         d.domain_name,
         d.fetch_date,
         d.registration_available_date,
         d.created_at,
+        d.dr,
+        d.linking_domains,
         GROUP_CONCAT(DISTINCT c.name) AS categories,
         GROUP_CONCAT(DISTINCT da.description SEPARATOR ' | ') AS descriptions
      FROM favorite_domains fd
@@ -33,7 +50,9 @@ $stmt = $db->prepare("SELECT
         d.domain_name,
         d.fetch_date,
         d.registration_available_date,
-        d.created_at
+        d.created_at,
+        d.dr,
+        d.linking_domains
      ORDER BY fd.created_at DESC");
 
 $stmt->execute([$_SESSION['user_id']]);
@@ -61,6 +80,12 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     <h1 class="h2"><i class="fas fa-heart"></i> Ulubione domeny</h1>
                 </div>
 
+                <?php if ($message): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check"></i> <?php echo htmlspecialchars($message); ?>
+                </div>
+                <?php endif; ?>
+
                 <div class="card">
                     <div class="card-body">
                         <?php if (empty($domains)): ?>
@@ -70,6 +95,7 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                             <p class="text-muted">Dodaj domeny do ulubionych, aby szybciej je odnaleźć.</p>
                         </div>
                         <?php else: ?>
+                        <form method="POST">
                         <div class="table-responsive">
                             <table class="table table-hover">
                                 <thead>
@@ -78,6 +104,8 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <th>Data pobrania</th>
                                         <th>Data rejestracji</th>
                                         <th>Kategorie</th>
+                                        <th>DR</th>
+                                        <th>L. domen</th>
                                         <th>Akcje</th>
                                     </tr>
                                 </thead>
@@ -102,6 +130,12 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                             <?php endif; ?>
                                         </td>
                                         <td>
+                                            <input type="number" class="form-control form-control-sm" name="dr[<?php echo $domain['id']; ?>]" value="<?php echo htmlspecialchars($domain['dr']); ?>">
+                                        </td>
+                                        <td>
+                                            <input type="number" class="form-control form-control-sm" name="links[<?php echo $domain['id']; ?>]" value="<?php echo htmlspecialchars($domain['linking_domains']); ?>">
+                                        </td>
+                                        <td>
                                             <div class="btn-group" role="group">
                                                 <a href="domains/view.php?id=<?php echo $domain['id']; ?>" class="btn btn-sm btn-outline-primary" title="Zobacz szczegóły">
                                                     <i class="fas fa-eye"></i>
@@ -119,6 +153,8 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                 </tbody>
                             </table>
                         </div>
+                        <button type="submit" class="btn btn-primary mt-2">Zapisz zmiany</button>
+                        </form>
                         <?php endif; ?>
                     </div>
                 </div>
