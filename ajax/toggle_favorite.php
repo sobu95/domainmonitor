@@ -8,6 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 require_once '../config/database.php';
+require_once '../includes/rdap.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -36,6 +37,19 @@ try {
         $stmt = $db->prepare("INSERT INTO favorite_domains (user_id, domain_id) VALUES (?, ?)");
         $stmt->execute([$_SESSION['user_id'], $domainId]);
         $isFavorite = true;
+
+        // Pobierz nazwę domeny do aktualizacji daty wygaśnięcia
+        $stmt = $db->prepare("SELECT domain_name FROM domains WHERE id = ?");
+        $stmt->execute([$domainId]);
+        $domain = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($domain) {
+            $rdapDate = fetchRdapExpiration($domain['domain_name']);
+            if ($rdapDate) {
+                $update = $db->prepare("UPDATE domains SET registration_available_date = ? WHERE id = ?");
+                $update->execute([$rdapDate, $domainId]);
+            }
+        }
     }
     
     echo json_encode([
