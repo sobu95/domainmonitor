@@ -71,6 +71,8 @@
                                         domain_name VARCHAR(255) NOT NULL,
                                         fetch_date DATE NOT NULL,
                                         registration_available_date DATE NOT NULL,
+                                        dr INT NULL,
+                                        linking_domains INT NULL,
                                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                         INDEX idx_domain_fetch (domain_name, fetch_date),
                                         INDEX idx_registration_date (registration_available_date)

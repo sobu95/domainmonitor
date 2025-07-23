@@ -116,6 +116,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 
 Jeśli korzystasz z wcześniejszej instalacji, wystarczy uruchomić ten skrypt lub
 zaimportować zaktualizowane migracje.
+Najnowsze wydanie dodaje kolumny `dr` i `linking_domains` w tabeli `domains`. Po aktualizacji pamiętaj o uruchomieniu najnowszej migracji z katalogu `supabase/migrations/`.
 
 ## Wsparcie
 
