@@ -18,13 +18,18 @@ try {
 }
 
 $message = '';
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['dr'], $_POST['links'])) {
-    $update = $db->prepare('UPDATE domains SET dr = ?, linking_domains = ? WHERE id = ?');
+if (
+    $_SERVER['REQUEST_METHOD'] === 'POST' &&
+    isset($_POST['dr'], $_POST['links'], $_POST['strength'])
+) {
+    $update = $db->prepare('UPDATE domains SET dr = ?, linking_domains = ?, link_profile_strength = ? WHERE id = ?');
     foreach ((array)$_POST['dr'] as $id => $drVal) {
         $linkVal = $_POST['links'][$id] ?? null;
+        $strengthVal = $_POST['strength'][$id] ?? null;
         $drVal = $drVal === '' ? null : $drVal;
         $linkVal = $linkVal === '' ? null : $linkVal;
-        $update->execute([$drVal, $linkVal, $id]);
+        $strengthVal = $strengthVal === '' ? null : $strengthVal;
+        $update->execute([$drVal, $linkVal, $strengthVal, $id]);
     }
     logActivity($db, 'update_domain_metrics', 'favorites');
     $message = 'Zapisano zmiany.';
@@ -38,6 +43,7 @@ $stmt = $db->prepare("SELECT
         d.created_at,
         d.dr,
         d.linking_domains,
+        d.link_profile_strength,
         GROUP_CONCAT(DISTINCT c.name) AS categories,
         GROUP_CONCAT(DISTINCT da.description SEPARATOR ' | ') AS descriptions
      FROM favorite_domains fd
@@ -52,7 +58,8 @@ $stmt = $db->prepare("SELECT
         d.registration_available_date,
         d.created_at,
         d.dr,
-        d.linking_domains
+        d.linking_domains,
+        d.link_profile_strength
      ORDER BY fd.created_at DESC");
 
 $stmt->execute([$_SESSION['user_id']]);
@@ -106,6 +113,7 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         <th>Kategorie</th>
                                         <th>DR</th>
                                         <th>L. domen</th>
+                                        <th>Siła profilu linkowania</th>
                                         <th>Akcje</th>
                                     </tr>
                                 </thead>
@@ -134,6 +142,14 @@ $domains = $stmt->fetchAll(PDO::FETCH_ASSOC);
                                         </td>
                                         <td>
                                             <input type="number" class="form-control form-control-sm" name="links[<?php echo $domain['id']; ?>]" value="<?php echo htmlspecialchars($domain['linking_domains']); ?>">
+                                        </td>
+                                        <td>
+                                            <select class="form-select form-select-sm" name="strength[<?php echo $domain['id']; ?>]">
+                                                <option value="" <?php echo $domain['link_profile_strength'] === null ? 'selected' : ''; ?>>-</option>
+                                                <option value="Silny" <?php echo $domain['link_profile_strength'] === 'Silny' ? 'selected' : ''; ?>>Silny</option>
+                                                <option value="Przyzwoity" <?php echo $domain['link_profile_strength'] === 'Przyzwoity' ? 'selected' : ''; ?>>Przyzwoity</option>
+                                                <option value="Słaby" <?php echo $domain['link_profile_strength'] === 'Słaby' ? 'selected' : ''; ?>>Słaby</option>
+                                            </select>
                                         </td>
                                         <td>
                                             <div class="btn-group" role="group">
