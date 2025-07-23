@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once '../config/database.php';
 require_once '../includes/functions.php';
+require_once '../includes/moz.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -36,6 +37,16 @@ try {
     if (!$domain) {
         header('Location: index.php');
         exit;
+    }
+
+    if ($domain['is_favorite'] && (is_null($domain['linking_domains_list']) || is_null($domain['domain_authority']))) {
+        updateMozMetrics($db, $domainId, $domain['domain_name']);
+
+        $stmt = $db->prepare(
+            "SELECT d.*,\n               CASE WHEN fd.id IS NOT NULL THEN 1 ELSE 0 END as is_favorite\n            FROM domains d\n            LEFT JOIN favorite_domains fd ON d.id = fd.domain_id AND fd.user_id = ?\n            WHERE d.id = ?"
+        );
+        $stmt->execute([$_SESSION['user_id'], $domainId]);
+        $domain = $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     // Pobierz analizy domeny
