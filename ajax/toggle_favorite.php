@@ -9,6 +9,7 @@ if (!isset($_SESSION['user_id'])) {
 
 require_once '../config/database.php';
 require_once '../includes/rdap.php';
+require_once '../includes/moz.php';
 
 $database = new Database();
 $db = $database->getConnection();
@@ -49,6 +50,8 @@ try {
                 $update = $db->prepare("UPDATE domains SET registration_available_date = ? WHERE id = ?");
                 $update->execute([$rdapDate, $domainId]);
             }
+
+            updateMozMetrics($db, $domainId, $domain['domain_name']);
         }
     }
     

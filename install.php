@@ -25,6 +25,7 @@
                                 'db_password' => $_POST['db_password'],
                                 'gemini_api_key' => $_POST['gemini_api_key'],
                                 'gemini_model' => $_POST['gemini_model'],
+                                'moz_api_keys' => array_filter(array_map('trim', explode("\n", $_POST['moz_api_keys']))),
                                 'email_smtp_host' => $_POST['email_smtp_host'],
                                 'email_smtp_port' => $_POST['email_smtp_port'],
                                 'email_username' => $_POST['email_username'],
@@ -73,6 +74,9 @@
                                         registration_available_date DATE NOT NULL,
                                         dr INT NULL,
                                         linking_domains INT NULL,
+                                        domain_authority INT NULL,
+                                        page_authority INT NULL,
+                                        linking_domains_list TEXT NULL,
                                         link_profile_strength VARCHAR(20) NULL,
                                         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                                         INDEX idx_domain_fetch (domain_name, fetch_date),
@@ -240,6 +244,12 @@
                                         <input type="text" class="form-control" name="gemini_model" value="gemini-2.5-flash" required>
                                     </div>
                                 </div>
+                            </div>
+
+                            <h5 class="mb-3 mt-4">Konfiguracja Moz API</h5>
+                            <div class="mb-3">
+                                <label class="form-label">Klucze API (jeden na linię)</label>
+                                <textarea class="form-control" name="moz_api_keys" rows="3"></textarea>
                             </div>
 
                             <h5 class="mb-3 mt-4">Konfiguracja email</h5>

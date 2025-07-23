@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
 
 Jeśli korzystasz z wcześniejszej instalacji, wystarczy uruchomić ten skrypt lub
 zaimportować zaktualizowane migracje.
-Najnowsze wydanie dodaje kolumny `dr`, `linking_domains` oraz `link_profile_strength` w tabeli `domains`. Po aktualizacji pamiętaj o uruchomieniu najnowszej migracji z katalogu `supabase/migrations/`.
+Najnowsze wydanie dodaje kolumny `domain_authority`, `page_authority` oraz `linking_domains_list` w tabeli `domains` i integrację z Moz Link API. Po aktualizacji pamiętaj o uruchomieniu najnowszej migracji z katalogu `supabase/migrations/`.
 
 ## Wsparcie
 
