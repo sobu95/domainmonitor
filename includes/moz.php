@@ -28,8 +28,11 @@ function fetchMozMetrics(string $domain): ?array
         curl_close($ch);
 
         if ($code === 200 && $response) {
-            $data = json_decode($response, true);
-            return $data[0] ?? $data;
+            $json = json_decode($response, true);
+            if (isset($json['results'][0])) {
+                return $json['results'][0];
+            }
+            return $json;
         }
     }
 
