@@ -84,6 +84,11 @@ $baseUrl = rtrim($config['site_url'], '/');
                     <i class="fas fa-file-alt"></i> Logi
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= $baseUrl ?>/admin/error_logs.php">
+                    <i class="fas fa-bug"></i> Logi błędów
+                </a>
+            </li>
         </ul>
         <?php endif; ?>
     </div>
