@@ -14,6 +14,24 @@ function writeLog($message) {
     file_put_contents($logFile, "[$timestamp] $message\n", FILE_APPEND | LOCK_EX);
 }
 
+function executeWithReconnect($sql, $params = []) {
+    global $database, $db;
+    try {
+        $stmt = $db->prepare($sql);
+        $stmt->execute($params);
+        return $stmt;
+    } catch (PDOException $e) {
+        if ($e->errorInfo[1] == 2006) {
+            writeLog('Połączenie z bazą utracone, ponowna próba...');
+            $db = $database->reconnect();
+            $stmt = $db->prepare($sql);
+            $stmt->execute($params);
+            return $stmt;
+        }
+        throw $e;
+    }
+}
+
 try {
     writeLog("Rozpoczęcie pobierania domen");
     
@@ -45,8 +63,7 @@ try {
         }
         
         // Sprawdź czy domena już istnieje
-        $stmt = $db->prepare("SELECT id FROM domains WHERE domain_name = ? AND fetch_date = ?");
-        $stmt->execute([$domain, $today]);
+        $stmt = executeWithReconnect("SELECT id FROM domains WHERE domain_name = ? AND fetch_date = ?", [$domain, $today]);
         
         if ($stmt->fetch()) {
             $duplicateCount++;
@@ -54,8 +71,8 @@ try {
         }
         
         // Wstaw domenę
-        $stmt = $db->prepare("INSERT INTO domains (domain_name, fetch_date, registration_available_date) VALUES (?, ?, ?)");
-        if ($stmt->execute([$domain, $today, $registrationDate])) {
+        $stmt = executeWithReconnect("INSERT INTO domains (domain_name, fetch_date, registration_available_date) VALUES (?, ?, ?)", [$domain, $today, $registrationDate]);
+        if ($stmt) {
             $insertedCount++;
         }
     }
@@ -63,28 +80,28 @@ try {
     writeLog("Wstawiono $insertedCount nowych domen, pominięto $duplicateCount duplikatów");
     
     // Zapisz log pobierania
-    $stmt = $db->prepare("INSERT INTO fetch_logs (fetch_date, domains_count, status) VALUES (?, ?, 'success')");
-    $stmt->execute([$today, $insertedCount]);
+    executeWithReconnect("INSERT INTO fetch_logs (fetch_date, domains_count, status) VALUES (?, ?, 'success')", [$today, $insertedCount]);
     
     // Uruchom analizę Gemini dla nowych domen
     if ($insertedCount > 0) {
         writeLog("Rozpoczęcie analizy Gemini");
         
         // Pobierz kategorie
-        $stmt = $db->prepare("SELECT * FROM categories WHERE active = 1");
-        $stmt->execute();
+        $stmt = executeWithReconnect("SELECT * FROM categories WHERE active = 1");
         $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         // Pobierz dzisiejsze domeny
-        $stmt = $db->prepare("SELECT id, domain_name FROM domains WHERE fetch_date = ?");
-        $stmt->execute([$today]);
+        $stmt = executeWithReconnect("SELECT id, domain_name FROM domains WHERE fetch_date = ?", [$today]);
         $todayDomains = $stmt->fetchAll(PDO::FETCH_ASSOC);
         
         $domainNames = array_column($todayDomains, 'domain_name');
         
         foreach ($categories as $category) {
             writeLog("Analiza kategorii: " . $category['name']);
-            
+
+            // Utrzymanie połączenia przy długich operacjach
+            executeWithReconnect('SELECT 1');
+
             $response = callGeminiAPI($category['prompt'], $domainNames);
             
             if ($response) {
@@ -101,8 +118,10 @@ try {
                     }
                     
                     if ($domainId) {
-                        $stmt = $db->prepare("INSERT INTO domain_analysis (domain_id, category_id, description, is_interesting) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE description = VALUES(description)");
-                        $stmt->execute([$domainId, $category['id'], $analyzedDomain['description']]);
+                        executeWithReconnect(
+                            "INSERT INTO domain_analysis (domain_id, category_id, description, is_interesting) VALUES (?, ?, ?, 1) ON DUPLICATE KEY UPDATE description = VALUES(description)",
+                            [$domainId, $category['id'], $analyzedDomain['description']]
+                        );
                     }
                 }
                 
@@ -116,50 +135,42 @@ try {
         }
         
         // Wyślij podsumowanie email
-        sendDailySummary($db, $today);
+        sendDailySummary($today);
         writeLog("Wysłano podsumowanie email");
     }
     
     writeLog("Zakończenie pobierania domen");
     
+} catch (PDOException $e) {
+    writeLog("BŁĄD PDO: " . $e->getMessage());
+    if ($e->errorInfo[1] == 2006) {
+        $db = $database->reconnect();
+    }
+    executeWithReconnect("INSERT INTO fetch_logs (fetch_date, domains_count, status, error_message) VALUES (?, 0, 'error', ?)", [date('Y-m-d'), $e->getMessage()]);
 } catch (Exception $e) {
     writeLog("BŁĄD: " . $e->getMessage());
-    
+
     // Zapisz błąd w bazie
-    $stmt = $db->prepare("INSERT INTO fetch_logs (fetch_date, domains_count, status, error_message) VALUES (?, 0, 'error', ?)");
-    $stmt->execute([date('Y-m-d'), $e->getMessage()]);
+    executeWithReconnect("INSERT INTO fetch_logs (fetch_date, domains_count, status, error_message) VALUES (?, 0, 'error', ?)", [date('Y-m-d'), $e->getMessage()]);
 }
 
-function sendDailySummary($db, $date) {
+function sendDailySummary($date) {
     // Pobierz wszystkich użytkowników
-    $stmt = $db->prepare("SELECT email FROM users WHERE role IN ('admin', 'user')");
-    $stmt->execute();
+    $stmt = executeWithReconnect("SELECT email FROM users WHERE role IN ('admin', 'user')");
     $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     // Pobierz statystyki dnia
-    $stmt = $db->prepare("
-        SELECT 
-            COUNT(DISTINCT d.id) as total_domains,
-            COUNT(DISTINCT da.domain_id) as interesting_domains,
-            GROUP_CONCAT(DISTINCT c.name) as categories
-        FROM domains d
-        LEFT JOIN domain_analysis da ON d.id = da.domain_id AND da.is_interesting = 1
-        LEFT JOIN categories c ON da.category_id = c.id
-        WHERE d.fetch_date = ?
-    ");
-    $stmt->execute([$date]);
+    $stmt = executeWithReconnect(
+        "SELECT COUNT(DISTINCT d.id) as total_domains, COUNT(DISTINCT da.domain_id) as interesting_domains, GROUP_CONCAT(DISTINCT c.name) as categories FROM domains d LEFT JOIN domain_analysis da ON d.id = da.domain_id AND da.is_interesting = 1 LEFT JOIN categories c ON da.category_id = c.id WHERE d.fetch_date = ?",
+        [$date]
+    );
     $stats = $stmt->fetch(PDO::FETCH_ASSOC);
     
     // Pobierz interesujące domeny
-    $stmt = $db->prepare("
-        SELECT d.domain_name, c.name as category, da.description
-        FROM domains d
-        JOIN domain_analysis da ON d.id = da.domain_id
-        JOIN categories c ON da.category_id = c.id
-        WHERE d.fetch_date = ? AND da.is_interesting = 1
-        ORDER BY c.name, d.domain_name
-    ");
-    $stmt->execute([$date]);
+    $stmt = executeWithReconnect(
+        "SELECT d.domain_name, c.name as category, da.description FROM domains d JOIN domain_analysis da ON d.id = da.domain_id JOIN categories c ON da.category_id = c.id WHERE d.fetch_date = ? AND da.is_interesting = 1 ORDER BY c.name, d.domain_name",
+        [$date]
+    );
     $interestingDomains = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     $subject = "Podsumowanie domen - " . date('d.m.Y', strtotime($date));
