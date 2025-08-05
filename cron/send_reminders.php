@@ -3,6 +3,8 @@
 require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/includes/functions.php';
 
+$config = include dirname(__DIR__) . '/config/config.php';
+
 $database = new Database();
 $db = $database->getConnection();
 
@@ -106,5 +108,8 @@ try {
     
 } catch (Exception $e) {
     writeLog("BŁĄD: " . $e->getMessage());
+    $date = date('Y-m-d H:i:s');
+    $body = "Data: {$date}<br>Błąd: " . $e->getMessage() . "<br>Log: {$logFile}";
+    sendEmail($config['admin_email'], 'Błąd crona', $body);
 }
 ?>

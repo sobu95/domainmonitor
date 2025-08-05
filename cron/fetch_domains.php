@@ -3,6 +3,8 @@
 require_once dirname(__DIR__) . '/config/database.php';
 require_once dirname(__DIR__) . '/includes/functions.php';
 
+$config = include dirname(__DIR__) . '/config/config.php';
+
 $database = new Database();
 $db = $database->getConnection();
 
@@ -147,11 +149,17 @@ try {
         $db = $database->reconnect();
     }
     executeWithReconnect("INSERT INTO fetch_logs (fetch_date, domains_count, status, error_message) VALUES (?, 0, 'error', ?)", [date('Y-m-d'), $e->getMessage()]);
+    $date = date('Y-m-d H:i:s');
+    $body = "Data: {$date}<br>Błąd: " . $e->getMessage() . "<br>Log: {$logFile}";
+    sendEmail($config['admin_email'], 'Błąd crona', $body);
 } catch (Exception $e) {
     writeLog("BŁĄD: " . $e->getMessage());
 
     // Zapisz błąd w bazie
     executeWithReconnect("INSERT INTO fetch_logs (fetch_date, domains_count, status, error_message) VALUES (?, 0, 'error', ?)", [date('Y-m-d'), $e->getMessage()]);
+    $date = date('Y-m-d H:i:s');
+    $body = "Data: {$date}<br>Błąd: " . $e->getMessage() . "<br>Log: {$logFile}";
+    sendEmail($config['admin_email'], 'Błąd crona', $body);
 }
 
 function sendDailySummary($date) {
