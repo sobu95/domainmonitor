@@ -20,17 +20,27 @@ $perPage = 20;
 
 $logFile = __DIR__ . '/../logs/ai_' . $date . '.log';
 $entries = [];
-if (file_exists($logFile)) {
+$infoMessage = '';
+$jsonError = false;
+if (!file_exists($logFile)) {
+    $infoMessage = 'Brak danych: plik logu nie istnieje.';
+} else {
     $lines = file($logFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {
         $entry = json_decode($line, true);
-        if (!$entry) {
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            $jsonError = true;
             continue;
         }
         if ($category && ($entry['category'] ?? '') !== $category) {
             continue;
         }
         $entries[] = $entry;
+    }
+    if ($jsonError) {
+        $infoMessage = 'Nieprawidłowy format danych w pliku logu.';
+    } elseif (empty($entries)) {
+        $infoMessage = 'Brak wpisów do wyświetlenia.';
     }
 }
 
@@ -78,6 +88,9 @@ $entries = array_slice($entries, ($page - 1) * $perPage, $perPage);
             </div>
             <div class="card">
                 <div class="card-body table-responsive">
+                    <?php if ($infoMessage): ?>
+                        <div class="alert alert-info"><?php echo htmlspecialchars($infoMessage); ?></div>
+                    <?php endif; ?>
                     <table class="table table-hover">
                         <thead>
                             <tr>
