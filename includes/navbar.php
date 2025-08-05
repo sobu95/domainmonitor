@@ -40,6 +40,7 @@ $baseUrl = rtrim($config['site_url'], '/');
                         <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/config.php">Konfiguracja</a></li>
                         <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/domains.php">Domeny</a></li>
                         <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/logs.php">Logi</a></li>
+                        <li><a class="dropdown-item" href="<?= $baseUrl ?>/admin/error_logs.php">Logi błędów</a></li>
                     </ul>
                 </li>
                 <?php endif; ?>
