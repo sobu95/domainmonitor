@@ -89,6 +89,11 @@ $baseUrl = rtrim($config['site_url'], '/');
                     <i class="fas fa-bug"></i> Logi błędów
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?= $baseUrl ?>/admin/ai_logs.php">
+                    <i class="fas fa-robot"></i> AI Logs
+                </a>
+            </li>
         </ul>
         <?php endif; ?>
     </div>
