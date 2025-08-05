@@ -111,7 +111,7 @@ function sendEmail($to, $subject, $body, $isHtml = true) {
 
 function callGeminiAPI($prompt, $domains) {
     $config = include __DIR__ . '/../config/config.php';
-    
+
     $data = [
         'contents' => [
             [
@@ -130,28 +130,54 @@ function callGeminiAPI($prompt, $domains) {
             'responseMimeType' => 'text/plain'
         ]
     ];
-    
+
+    // Save request payload for logging (without API key)
+    $requestPayload = json_encode($data);
+
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, "https://generativelanguage.googleapis.com/v1beta/models/{$config['gemini_model']}:generateContent?key={$config['gemini_api_key']}");
     curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $requestPayload);
     curl_setopt($ch, CURLOPT_HTTPHEADER, [
         'Content-Type: application/json'
     ]);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    
+
     $response = curl_exec($ch);
     $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $curlError = curl_error($ch);
     curl_close($ch);
-    
+
+    // Log request/response
+    logAIRequest($prompt, $domains, $requestPayload, $response, $httpCode, $curlError);
+
     if ($httpCode === 200) {
         $result = json_decode($response, true);
         if (isset($result['candidates'][0]['content']['parts'][0]['text'])) {
             return $result['candidates'][0]['content']['parts'][0]['text'];
         }
     }
-    
+
     return false;
+}
+
+function logAIRequest($prompt, $domains, $request, $response, $httpCode, $curlError = null) {
+    $logDir = __DIR__ . '/../logs';
+    if (!is_dir($logDir)) {
+        mkdir($logDir, 0777, true);
+    }
+    $file = $logDir . '/ai_' . date('Y-m-d') . '.log';
+    $entry = [
+        'time' => date('c'),
+        'prompt' => $prompt,
+        'domains' => $domains,
+        'request' => json_decode($request, true),
+        'response' => $response,
+        'http_code' => $httpCode,
+        'error' => $curlError,
+        'category' => ($httpCode === 200 && !$curlError) ? 'success' : 'error'
+    ];
+    file_put_contents($file, json_encode($entry, JSON_UNESCAPED_UNICODE) . PHP_EOL, FILE_APPEND);
 }
 
 function parseDomainAnalysis($htmlResponse) {
